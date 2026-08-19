@@ -20,7 +20,7 @@ Un script `test_api.py` est fourni à la racine du projet pour simuler l'envoi d
 Ouvrez un terminal à la racine du projet et exécutez la commande suivante :
 
 ```bash
-python test_api.py <URL_API> <SENDER> <RECIPIENTS> "<MESSAGE>" [<USERNAME> <PASSWORD> <NOTIFY_SELF> <TEXT_MODE>]
+python test_api.py <URL_API> <SENDER> <RECIPIENTS> "<MESSAGE>" [<USERNAME> <PASSWORD> <NOTIFY_SELF> <TEXT_MODE> <ATTACHMENT_PATH>]
 ```
 
 **Exemple sans authentification :**
@@ -47,6 +47,7 @@ python test_api.py http://192.168.1.10:8080 +33612345678 +33612345678 "Ceci est 
 - `<PASSWORD>` (Optionnel) : Le mot de passe pour le Basic Auth.
 - `<NOTIFY_SELF>` (Optionnel, défaut: `true`) : `true` ou `false` pour s'envoyer le message également à soi-même.
 - `<TEXT_MODE>` (Optionnel, défaut: `styled`) : `normal` ou `styled`. `styled` permet le formatage Signal.
+- `<ATTACHMENT_PATH>` (Optionnel) : Chemin vers un fichier image local à joindre au message, pour tester le champ `base64_attachments` de l'API.
 
 ## Interprétation des résultats
 

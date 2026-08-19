@@ -40,6 +40,10 @@
         "text_mode": {
           "name": "Text mode",
           "description": "Defines how the text should be treated. 'styled' allows for formatting."
+        },
+        "attachment_entity_id": {
+          "name": "Attachment(s)",
+          "description": "One or more camera or image entities whose picture will be attached to the message (e.g. a Ring doorbell snapshot)."
         }
       }
     }

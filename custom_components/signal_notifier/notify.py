@@ -13,6 +13,7 @@ from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 
 from .const import CONF_URL, CONF_SENDER, CONF_USERNAME, CONF_PASSWORD, DOMAIN
 from .client import async_send_signal_message
+from .attachments import async_resolve_attachments
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -35,19 +36,21 @@ async def async_get_service(
     username = config_entry.data.get(CONF_USERNAME)
     password = config_entry.data.get(CONF_PASSWORD)
 
-    return SignalNotificationService(url, sender, username, password)
+    return SignalNotificationService(hass, url, sender, username, password)
 
 class SignalNotificationService(BaseNotificationService):
     """Implementation of a notification service for Signal."""
 
     def __init__(
         self,
+        hass: HomeAssistant,
         url: str,
         sender: str,
         username: str | None = None,
         password: str | None = None,
     ) -> None:
         """Initialize the service."""
+        self._hass = hass
         self._url = url.rstrip("/")
         self._sender = sender
         self._username = username
@@ -62,7 +65,12 @@ class SignalNotificationService(BaseNotificationService):
         sender = data.get("sender", self._sender)
         notify_self = data.get("notify_self", True)
         text_mode = data.get("text_mode", "styled")
-        
+
+        attachment_entity_id = data.get("attachment_entity_id") or []
+        base64_attachments = await async_resolve_attachments(
+            self._hass, attachment_entity_id
+        )
+
         await async_send_signal_message(
             url=self._url,
             phone_number=sender,
@@ -72,4 +80,5 @@ class SignalNotificationService(BaseNotificationService):
             password=self._password,
             notify_self=notify_self,
             text_mode=text_mode,
+            base64_attachments=base64_attachments,
         )

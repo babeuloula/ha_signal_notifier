@@ -34,3 +34,14 @@ send_message:
           options:
             - "normal"
             - "styled"
+    attachment_entity_id:
+      name: Pièce(s) jointe(s)
+      description: Une ou plusieurs entités caméra ou image dont l'image sera jointe au message (ex. le snapshot d'une sonnette Ring).
+      required: false
+      selector:
+        entity:
+          multiple: true
+          filter:
+            domain:
+              - camera
+              - image
