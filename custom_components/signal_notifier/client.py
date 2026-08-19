@@ -16,6 +16,7 @@ async def async_send_signal_message(
     password: str | None = None,
     notify_self: bool = True,
     text_mode: str = "styled",
+    base64_attachments: list[str] | None = None,
 ) -> bool:
     """Send a message via Signal API."""
     url = url.rstrip("/")
@@ -40,6 +41,9 @@ async def async_send_signal_message(
         "notify_self": notify_self,
         "text_mode": text_mode,
     }
+
+    if base64_attachments:
+        payload["base64_attachments"] = base64_attachments
 
     auth = None
     if username and password:

@@ -7,6 +7,7 @@ from homeassistant.core import HomeAssistant, ServiceCall
 
 from .const import DOMAIN, CONF_URL, CONF_SENDER, CONF_USERNAME, CONF_PASSWORD
 from .client import async_send_signal_message
+from .attachments import async_resolve_attachments
 
 PLATFORMS: list[Platform] = [Platform.NOTIFY]
 
@@ -25,7 +26,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         recipients = call.data.get("recipients")
         notify_self = call.data.get("notify_self", True)
         text_mode = call.data.get("text_mode", "styled")
-        
+        attachment_entity_id = call.data.get("attachment_entity_id") or []
+
+        base64_attachments = await async_resolve_attachments(hass, attachment_entity_id)
+
         await async_send_signal_message(
             url=url,
             phone_number=sender,
@@ -35,6 +39,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             password=password,
             notify_self=notify_self,
             text_mode=text_mode,
+            base64_attachments=base64_attachments,
         )
 
     hass.services.async_register(DOMAIN, "send_message", handle_send_message)

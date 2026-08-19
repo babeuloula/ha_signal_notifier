@@ -54,6 +54,7 @@ C'est la méthode recommandée car elle offre des champs clairs dans l'interface
 - `recipients` : Un ou plusieurs numéros de téléphone séparés par des points-virgules (`;`).
 - `notify_self` : (Optionnel, défaut: `true`) Si `true`, envoie aussi le message à l'expéditeur.
 - `text_mode` : (Optionnel, défaut: `styled`) `normal` ou `styled`. `styled` permet le formatage Signal.
+- `attachment_entity_id` : (Optionnel) Une ou plusieurs entités `camera.*` ou `image.*` dont l'image sera jointe au message.
 
 **Exemple YAML :**
 ```yaml
@@ -65,6 +66,8 @@ data:
   recipients: "+33612345678;+33600000000"
   notify_self: true
   text_mode: "styled"
+  attachment_entity_id:
+    - camera.ring_front_door
 ```
 
 ### Service `notify.signal_notifier`
@@ -79,6 +82,30 @@ data:
   data:
     notify_self: true
     text_mode: "styled"
+    attachment_entity_id:
+      - camera.ring_front_door
+```
+
+### Exemple : joindre le snapshot d'une sonnette Ring (ring-mqtt)
+
+Si vous utilisez [ring-mqtt](https://github.com/tsightler/ring-mqtt), la sonnette
+expose généralement un binary_sensor "ding" et une entité caméra donnant le
+dernier snapshot. Exemple d'automatisation :
+
+```yaml
+automation:
+  - alias: "Signal - Sonnette Ring"
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.sonnette_ring_ding
+        to: "on"
+    action:
+      - service: signal_notifier.send_message
+        data:
+          message: "Quelqu'un sonne à la porte !"
+          recipients: "+33612345678"
+          attachment_entity_id:
+            - camera.sonnette_ring_snapshot
 ```
 
 ### Test local (sans Home Assistant)
