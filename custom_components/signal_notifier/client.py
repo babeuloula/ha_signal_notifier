@@ -7,6 +7,73 @@ from typing import Any
 
 _LOGGER = logging.getLogger(__name__)
 
+def _build_auth(
+    username: str | None, password: str | None
+) -> aiohttp.BasicAuth | None:
+    """Build the Basic Auth object if credentials are provided."""
+    if username and password:
+        return aiohttp.BasicAuth(username, password)
+    return None
+
+
+async def _async_get_json(
+    url: str, username: str | None, password: str | None
+) -> list[dict[str, Any]]:
+    """GET a JSON list from the Signal API."""
+    timeout = aiohttp.ClientTimeout(total=30)
+    async with aiohttp.ClientSession(timeout=timeout) as session:
+        async with session.get(url, auth=_build_auth(username, password)) as response:
+            response.raise_for_status()
+            data = await response.json(content_type=None)
+            return data if isinstance(data, list) else []
+
+
+async def async_fetch_signal_groups(
+    url: str,
+    phone_number: str,
+    username: str | None = None,
+    password: str | None = None,
+) -> list[dict[str, str]]:
+    """Fetch the groups of the account, as select options (value = group id)."""
+    groups = await _async_get_json(
+        f"{url.rstrip('/')}/v1/groups/{phone_number}", username, password
+    )
+    options = [
+        {"value": group["id"], "label": group.get("name") or group["id"]}
+        for group in groups
+        if group.get("id") and not group.get("blocked")
+    ]
+    return sorted(options, key=lambda option: option["label"].lower())
+
+
+async def async_fetch_signal_contacts(
+    url: str,
+    phone_number: str,
+    username: str | None = None,
+    password: str | None = None,
+) -> list[dict[str, str]]:
+    """Fetch the contacts of the account, as select options (value = number or uuid)."""
+    contacts = await _async_get_json(
+        f"{url.rstrip('/')}/v1/contacts/{phone_number}", username, password
+    )
+    options = []
+    for contact in contacts:
+        if contact.get("blocked"):
+            continue
+        value = contact.get("number") or contact.get("uuid")
+        if not value:
+            continue
+        name = (
+            contact.get("name")
+            or contact.get("profile_name")
+            or contact.get("given_name")
+            or contact.get("username")
+        )
+        label = f"{name} ({contact['number']})" if name and contact.get("number") else name or value
+        options.append({"value": value, "label": label})
+    return sorted(options, key=lambda option: option["label"].lower())
+
+
 async def async_send_signal_message(
     url: str,
     phone_number: str,
@@ -45,13 +112,11 @@ async def async_send_signal_message(
     if base64_attachments:
         payload["base64_attachments"] = base64_attachments
 
-    auth = None
-    if username and password:
-        auth = aiohttp.BasicAuth(username, password)
-
     async with aiohttp.ClientSession() as session:
         try:
-            async with session.post(endpoint, json=payload, auth=auth) as response:
+            async with session.post(
+                endpoint, json=payload, auth=_build_auth(username, password)
+            ) as response:
                 if response.status >= 400:
                     text = await response.text()
                     _LOGGER.error(

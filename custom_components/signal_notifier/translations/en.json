@@ -29,9 +29,17 @@
           "name": "Message",
           "description": "The message content to send."
         },
+        "groups": {
+          "name": "Groups",
+          "description": "One or more Signal groups to send to (list fetched from the Signal API)."
+        },
+        "contacts": {
+          "name": "Contacts",
+          "description": "One or more Signal contacts to send to (list fetched from the Signal API)."
+        },
         "recipients": {
-          "name": "Recipients",
-          "description": "The phone numbers of the recipients, separated by semicolons."
+          "name": "Phone numbers",
+          "description": "Additional phone numbers, separated by semicolons (international format)."
         },
         "notify_self": {
           "name": "Notify self",

@@ -5,7 +5,8 @@ Cette intégration permet d'envoyer des notifications via Signal en utilisant un
 ## Fonctionnalités
 - Configuration simplifiée de l'URL de l'API via l'interface utilisateur.
 - Service dédié `signal_notifier.send_message` pour un envoi facile.
-- Support du multi-destinataires via séparation par points-virgules.
+- Sélection des groupes et contacts Signal dans des listes déroulantes (récupérés dynamiquement depuis l'API).
+- Support du multi-destinataires (groupes, contacts et numéros séparés par des points-virgules).
 - Service de notification standard `notify.signal_notifier`.
 
 ## Prérequis
@@ -51,7 +52,14 @@ C'est la méthode recommandée car elle offre des champs clairs dans l'interface
 
 **Paramètres :**
 - `message` : Le texte à envoyer.
-- `recipients` : Un ou plusieurs numéros de téléphone séparés par des points-virgules (`;`).
+- `groups` : (Optionnel) Liste des groupes Signal destinataires (identifiants `group.xxx`).
+- `contacts` : (Optionnel) Liste des contacts Signal destinataires (numéro ou UUID).
+- `recipients` : (Optionnel) Un ou plusieurs numéros de téléphone séparés par des points-virgules (`;`).
+
+Dans l'interface de Home Assistant, `groups` et `contacts` sont des listes déroulantes à choix multiple
+affichant le nom des groupes et contacts, récupérés via l'API Signal (`/v1/groups` et `/v1/contacts`)
+au démarrage puis toutes les 15 minutes. Les trois champs sont cumulables ; si aucun destinataire
+n'est renseigné, le message est envoyé à l'expéditeur.
 - `notify_self` : (Optionnel, défaut: `true`) Si `true`, envoie aussi le message à l'expéditeur.
 - `text_mode` : (Optionnel, défaut: `styled`) `normal` ou `styled`. `styled` permet le formatage Signal.
 - `attachment_entity_id` : (Optionnel) Une ou plusieurs entités `camera.*` ou `image.*` dont l'image sera jointe au message.
@@ -63,6 +71,10 @@ data:
   message: |
     Bonjour depuis Home Assistant !
     Ceci est un message sur plusieurs lignes.
+  groups:
+    - "group.ABCDEF123456="
+  contacts:
+    - "+33611111111"
   recipients: "+33612345678;+33600000000"
   notify_self: true
   text_mode: "styled"
