@@ -29,9 +29,17 @@
           "name": "Message",
           "description": "Le contenu du message à envoyer."
         },
+        "groups": {
+          "name": "Groupes",
+          "description": "Un ou plusieurs groupes Signal destinataires (liste récupérée depuis l'API Signal)."
+        },
+        "contacts": {
+          "name": "Contacts",
+          "description": "Un ou plusieurs contacts Signal destinataires (liste récupérée depuis l'API Signal)."
+        },
         "recipients": {
-          "name": "Destinataires",
-          "description": "Les numéros de téléphone des destinataires, séparés par des points-virgules."
+          "name": "Numéros de téléphone",
+          "description": "Numéros de téléphone supplémentaires, séparés par des points-virgules (format international)."
         },
         "notify_self": {
           "name": "S'envoyer à soi-même",

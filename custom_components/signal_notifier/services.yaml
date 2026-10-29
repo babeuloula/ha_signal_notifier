@@ -10,10 +10,30 @@ send_message:
       selector:
         text:
           multiline: true
+    groups:
+      name: Groupes
+      description: Un ou plusieurs groupes Signal destinataires (liste récupérée depuis l'API Signal).
+      required: false
+      example: "group.ABCDEF123456="
+      selector:
+        select:
+          multiple: true
+          custom_value: true
+          options: []
+    contacts:
+      name: Contacts
+      description: Un ou plusieurs contacts Signal destinataires (liste récupérée depuis l'API Signal).
+      required: false
+      example: "+33612345678"
+      selector:
+        select:
+          multiple: true
+          custom_value: true
+          options: []
     recipients:
-      name: Destinataires
-      description: Les numéros de téléphone des destinataires, séparés par des points-virgules (format international).
-      required: true
+      name: Numéros de téléphone
+      description: Numéros de téléphone supplémentaires, séparés par des points-virgules (format international).
+      required: false
       example: "+33612345678;+33600000000"
       selector:
         text:
