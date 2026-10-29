@@ -101,32 +101,41 @@ async def async_send_signal_message(
     if not recipient_list:
         recipient_list = [phone_number]
 
-    payload = {
-        "message": message,
-        "number": phone_number,
-        "recipients": recipient_list,
-        "notify_self": notify_self,
-        "text_mode": text_mode,
-    }
+    # L'API refuse de mélanger groupes et numéros dans une même requête
+    groups = [r for r in recipient_list if r.startswith("group.")]
+    numbers = [r for r in recipient_list if not r.startswith("group.")]
+    batches = [batch for batch in (groups, numbers) if batch]
 
-    if base64_attachments:
-        payload["base64_attachments"] = base64_attachments
-
+    success = True
     async with aiohttp.ClientSession() as session:
-        try:
-            async with session.post(
-                endpoint, json=payload, auth=_build_auth(username, password)
-            ) as response:
-                if response.status >= 400:
-                    text = await response.text()
-                    _LOGGER.error(
-                        "Error sending Signal message: %s - %s",
-                        response.status,
-                        text,
-                    )
-                    return False
-                _LOGGER.debug("Signal message sent successfully")
-                return True
-        except Exception as ex:
-            _LOGGER.error("Exception while sending Signal message: %s", ex)
-            return False
+        for batch in batches:
+            payload = {
+                "message": message,
+                "number": phone_number,
+                "recipients": batch,
+                "notify_self": notify_self,
+                "text_mode": text_mode,
+            }
+
+            if base64_attachments:
+                payload["base64_attachments"] = base64_attachments
+
+            try:
+                async with session.post(
+                    endpoint, json=payload, auth=_build_auth(username, password)
+                ) as response:
+                    if response.status >= 400:
+                        text = await response.text()
+                        _LOGGER.error(
+                            "Error sending Signal message: %s - %s",
+                            response.status,
+                            text,
+                        )
+                        success = False
+                        continue
+                    _LOGGER.debug("Signal message sent successfully")
+            except Exception as ex:
+                _LOGGER.error("Exception while sending Signal message: %s", ex)
+                success = False
+
+    return success
